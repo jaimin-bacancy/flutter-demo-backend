@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const MyUser = require("./MyUser");
 
 const userSchema = new mongoose.Schema(
   {
@@ -14,6 +15,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       require: true,
       default: "",
+    },
+    myUsers: {
+      type: [MyUser.schema],
+      default: [],
     },
   },
   {
