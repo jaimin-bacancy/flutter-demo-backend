@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
 const responses = require("../utils/responses");
 const jwt = require("jsonwebtoken");
+const Media = require("../models/Media");
 
 async function register(req, res) {
   try {
@@ -22,6 +23,21 @@ async function register(req, res) {
     });
 
     return responses.successResponse(res, null, "Register successfully");
+  } catch (error) {
+    return responses.internalFailureResponse(res, error);
+  }
+}
+
+async function uploadMedia(req, res) {
+  try {
+    const newImage = new Media({
+      filename: req.file.filename,
+      path: req.file.path,
+    });
+
+    await newImage.save();
+
+    return responses.successResponse(res, null, "Image uploaded successfully");
   } catch (error) {
     return responses.internalFailureResponse(res, error);
   }
@@ -164,4 +180,5 @@ module.exports = {
   addMyUser,
   removeMyUser,
   updateMyUser,
+  uploadMedia,
 };

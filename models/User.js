@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const MyUser = require("./MyUser");
+const Media = require("./Media");
 
 const userSchema = new mongoose.Schema(
   {
@@ -19,6 +20,9 @@ const userSchema = new mongoose.Schema(
     myUsers: {
       type: [MyUser.schema],
       default: [],
+    },
+    profile: {
+      type: Media.schema,
     },
   },
   {

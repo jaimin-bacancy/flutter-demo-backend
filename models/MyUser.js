@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Media = require("./Media");
 
 const myUserSchema = new mongoose.Schema(
   {
@@ -9,6 +10,9 @@ const myUserSchema = new mongoose.Schema(
     email: {
       type: String,
       require: true,
+    },
+    profile: {
+      type: Media.schema,
     },
   },
   {
