@@ -56,6 +56,12 @@ async function login(req, res) {
       );
     }
 
+    const updatedUser = await User.findByIdAndUpdate(
+      user._id,
+      { lastLogin: new Date().toISOString() },
+      { new: true }
+    );
+
     bcrypt.compare(password, user.password, function (err, result) {
       if (!result) {
         return responses.authFailureResponse(
@@ -69,8 +75,12 @@ async function login(req, res) {
           _id: user._id,
           email: user.email,
           name: user.name,
+          lastLogin: updatedUser.lastLogin,
         },
-        process.env.MONGO_URL
+        process.env.MONGO_URL,
+        {
+          expiresIn: "7d",
+        }
       );
 
       return responses.successResponse(res, { token }, "Login successfully");

@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const { authFailureResponse } = require("../../utils/responses");
+const User = require("../../models/User");
 
 const TAG = "auth.guard";
 
@@ -17,6 +18,13 @@ const checkToken = async (req, res, next) => {
 
     if (result.payload) {
       let payload = result.payload;
+      const user = await User.findById(result.payload._id);
+
+      if (payload.lastLogin != user.lastLogin)
+        return authFailureResponse(
+          res,
+          "Either token is invalid or has expired!"
+        );
 
       req.payload = payload;
       req.userId = payload._id;

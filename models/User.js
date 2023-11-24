@@ -20,6 +20,9 @@ const userSchema = new mongoose.Schema(
     profile: {
       type: Media.schema,
     },
+    lastLogin: {
+      type: String,
+    },
   },
   {
     timestamps: true,
