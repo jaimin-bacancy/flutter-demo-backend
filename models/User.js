@@ -17,10 +17,6 @@ const userSchema = new mongoose.Schema(
       require: true,
       default: "",
     },
-    myUsers: {
-      type: [MyUser.schema],
-      default: [],
-    },
     profile: {
       type: Media.schema,
     },

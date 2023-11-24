@@ -14,6 +14,10 @@ const myUserSchema = new mongoose.Schema(
     profile: {
       type: Media.schema,
     },
+    createdBy: {
+      type: mongoose.Types.ObjectId,
+      require: true,
+    },
   },
   {
     timestamps: true,

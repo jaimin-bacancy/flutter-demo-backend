@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const responses = require("../utils/responses");
 const jwt = require("jsonwebtoken");
 const Media = require("../models/Media");
+const MyUser = require("../models/MyUser");
 
 async function register(req, res) {
   try {
@@ -81,9 +82,15 @@ async function login(req, res) {
 
 async function getMyUsers(req, res) {
   try {
-    let user = await User.findById(req.userId);
+    let user = await MyUser.aggregate([
+      {
+        $match: {
+          createdBy: new mongoose.Types.ObjectId(req.userId),
+        },
+      },
+    ]);
 
-    return responses.successResponse(res, user.myUsers);
+    return responses.successResponse(res, user);
   } catch (error) {
     return responses.internalFailureResponse(res, error);
   }
@@ -91,27 +98,25 @@ async function getMyUsers(req, res) {
 
 async function addMyUser(req, res) {
   try {
-    let checkAlreadyExist = await User.findById(req.userId);
-
-    let findMyUser = checkAlreadyExist.myUsers.find((item, index) => {
-      return item.email == req.body.email;
+    let checkAlreadyExist = await MyUser.find({
+      email: req.body.email,
+      createdBy: new mongoose.Types.ObjectId(req.userId),
     });
 
-    if (findMyUser) {
+    // let findMyUser = checkAlreadyExist.myUsers.find((item, index) => {
+    //   return item.email == req.body.email;
+    // });
+
+    if (checkAlreadyExist.length != 0) {
       return responses.badRequestResponse(res, "User already exists");
     }
 
-    let user = await User.findByIdAndUpdate(
-      req.userId,
-      {
-        $addToSet: {
-          myUsers: req.body,
-        },
-      },
-      { new: true }
-    );
+    let user = await MyUser.create({
+      ...req.body,
+      createdBy: req.userId,
+    });
 
-    return responses.successResponse(res, user.myUsers, "User added");
+    return responses.successResponse(res, user, "User added");
   } catch (error) {
     return responses.internalFailureResponse(res, error);
   }
@@ -119,19 +124,12 @@ async function addMyUser(req, res) {
 
 async function removeMyUser(req, res) {
   try {
-    let user = await User.findByIdAndUpdate(
-      req.userId,
-      {
-        $pull: {
-          myUsers: {
-            _id: new mongoose.Types.ObjectId(req.params.userId),
-          },
-        },
-      },
+    let user = await MyUser.findByIdAndDelete(
+      new mongoose.Types.ObjectId(req.params.userId),
       { new: true }
     );
 
-    return responses.successResponse(res, user.myUsers);
+    return responses.successResponse(res, user);
   } catch (error) {
     return responses.internalFailureResponse(res, error);
   }
@@ -139,35 +137,24 @@ async function removeMyUser(req, res) {
 
 async function updateMyUser(req, res) {
   try {
-    let checkAlreadyExist = await User.findById(req.userId);
-
-    let findMyUser = checkAlreadyExist.myUsers.find((item, index) => {
-      return item.email == req.body.email && item._id != req.params.userId;
+    let checkAlreadyExist = await MyUser.find({
+      email: req.body.email,
+      createdBy: new mongoose.Types.ObjectId(req.userId),
     });
 
-    if (findMyUser) {
+    if (checkAlreadyExist.length > 1) {
       return responses.badRequestResponse(res, "User already exists");
     }
 
-    let user = await User.findOneAndUpdate(
+    let user = await MyUser.findByIdAndUpdate(
+      req.params.userId,
       {
-        _id: req.userId,
-        "myUsers._id": new mongoose.Types.ObjectId(req.params.userId),
-      },
-      {
-        $set: {
-          "myUsers.$.name": req.body.name,
-          "myUsers.$.email": req.body.email,
-        },
+        ...req.body,
       },
       { new: true }
     );
 
-    return responses.successResponse(
-      res,
-      user.myUsers,
-      "User update successfully"
-    );
+    return responses.successResponse(res, user, "User update successfully");
   } catch (error) {
     return responses.internalFailureResponse(res, error);
   }
