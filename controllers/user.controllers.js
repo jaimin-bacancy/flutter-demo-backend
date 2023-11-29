@@ -83,7 +83,18 @@ async function login(req, res) {
         }
       );
 
-      return responses.successResponse(res, { token }, "Login successfully");
+      return responses.successResponse(
+        res,
+        {
+          user: {
+            _id: updatedUser._id,
+            email: updatedUser.email,
+            name: updatedUser.name,
+          },
+          token,
+        },
+        "Login successfully"
+      );
     });
   } catch (error) {
     return responses.internalFailureResponse(res, error);
