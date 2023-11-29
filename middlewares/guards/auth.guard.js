@@ -20,7 +20,10 @@ const checkToken = async (req, res, next) => {
       let payload = result.payload;
       const user = await User.findById(result.payload._id);
 
-      if (payload.lastLogin != user.lastLogin)
+      const lastLogin = new Date(payload.lastLogin).getTime();
+      const dbLastLogin = new Date(user.lastLogin).getTime();
+
+      if (lastLogin != dbLastLogin)
         return authFailureResponse(
           res,
           "Either token is invalid or has expired!"

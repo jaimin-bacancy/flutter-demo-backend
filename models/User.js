@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema(
       type: Media.schema,
     },
     lastLogin: {
-      type: String,
+      type: Date,
     },
   },
   {

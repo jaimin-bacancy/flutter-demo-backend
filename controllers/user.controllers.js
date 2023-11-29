@@ -58,7 +58,7 @@ async function login(req, res) {
 
     const updatedUser = await User.findByIdAndUpdate(
       user._id,
-      { lastLogin: new Date().toISOString() },
+      { lastLogin: new Date() },
       { new: true }
     );
 
