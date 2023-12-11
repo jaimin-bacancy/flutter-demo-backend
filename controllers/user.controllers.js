@@ -36,9 +36,19 @@ async function uploadMedia(req, res) {
       path: req.file.path,
     });
 
-    await newImage.save();
+    const data = await newImage.save();
 
-    return responses.successResponse(res, null, "Image uploaded successfully");
+    return responses.successResponse(res, data, "Image uploaded successfully");
+  } catch (error) {
+    return responses.internalFailureResponse(res, error);
+  }
+}
+
+async function getMedia(req, res) {
+  try {
+    const files = await Media.find();
+
+    return responses.successResponse(res, files, "Image get successfully");
   } catch (error) {
     return responses.internalFailureResponse(res, error);
   }
@@ -189,4 +199,5 @@ module.exports = {
   removeMyUser,
   updateMyUser,
   uploadMedia,
+  getMedia,
 };

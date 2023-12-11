@@ -11,6 +11,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/user", require("./routes/user"));
+app.use("/api/upload", require("./routes/upload"));
 
 let port = process.env.PORT || 8000;
 app.listen(port, () => {
