@@ -113,13 +113,26 @@ async function login(req, res) {
 
 async function getMyUsers(req, res) {
   try {
-    let user = await MyUser.aggregate([
-      {
-        $match: {
-          createdBy: new mongoose.Types.ObjectId(req.userId),
-        },
+    const searchText = req.query.query;
+
+    const query = {
+      $match: {
+        createdBy: new mongoose.Types.ObjectId(req.userId),
       },
-    ]);
+    };
+
+    if (searchText) {
+      query.$match.$and = [
+        {
+          name: {
+            $regex: searchText,
+            $options: "i",
+          },
+        },
+      ];
+    }
+
+    let user = await MyUser.aggregate([query]);
 
     return responses.successResponse(res, user);
   } catch (error) {
