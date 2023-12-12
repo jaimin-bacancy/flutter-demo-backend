@@ -18,6 +18,10 @@ const myUserSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       require: true,
     },
+    dob: {
+      type: Date,
+      require: true,
+    },
   },
   {
     timestamps: true,
