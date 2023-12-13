@@ -132,9 +132,30 @@ async function getMyUsers(req, res) {
       ];
     }
 
-    let user = await MyUser.aggregate([query]);
+    let user = await MyUser.aggregate([
+      query,
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          email: 1,
+          profile: 1,
+          dob: 1,
+          createdBy: 1,
+        },
+      },
+    ]);
+    const totalLength = user.length;
+    const offset = req.query.offset ?? 0;
+    const limit = req.query.limit ?? 10;
+    const paginatedData = user.slice(offset, limit);
 
-    return responses.successResponse(res, user);
+    return responses.paginatedResponse(
+      res,
+      paginatedData,
+      totalLength,
+      parseInt(offset, 10)
+    );
   } catch (error) {
     return responses.internalFailureResponse(res, error);
   }
