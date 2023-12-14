@@ -147,7 +147,7 @@ async function getMyUsers(req, res) {
     ]);
     const totalLength = user.length;
     const offset = req.query.offset ?? 0;
-    const limit = req.query.limit ?? 10;
+    const limit = offset + (req.query.limit ?? 10);
     const paginatedData = user.slice(offset, limit);
 
     return responses.paginatedResponse(
