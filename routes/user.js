@@ -3,6 +3,8 @@ const router = express.Router();
 const {
   register,
   login,
+  socialLogin,
+  getGoogleUser,
   getMyUsers,
   addMyUser,
   removeMyUser,
@@ -18,6 +20,8 @@ router.get("/test", (req, res) => {
 router.post("/register", [], register);
 
 router.get("/login", [], login);
+
+router.post("/socialLogin", [], socialLogin);
 
 router.get("/myUsers", validateEntry, getMyUsers);
 

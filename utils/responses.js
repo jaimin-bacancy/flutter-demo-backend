@@ -20,12 +20,16 @@ const notFoundResponse = (res, message) => {
   return generateResponse(res, false, message, 404);
 };
 
-const internalFailureResponse = (res, data) => {
-  return generateResponse(res, false, "internal server error", 500, data);
+const internalFailureResponse = (
+  res,
+  data,
+  message = "internal server error"
+) => {
+  return generateResponse(res, false, message, 500, data);
 };
 
-const authFailureResponse = (res, message) => {
-  return generateResponse(res, false, message, 401);
+const authFailureResponse = (res, message, data = null) => {
+  return generateResponse(res, false, message, 401, data);
 };
 
 const conflictResponse = (res, message) => {

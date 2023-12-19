@@ -20,6 +20,11 @@ const userSchema = new mongoose.Schema(
     profile: {
       type: Media.schema,
     },
+    socialType: {
+      type: String,
+      require: true,
+      default: "4",
+    },
     lastLogin: {
       type: Date,
     },

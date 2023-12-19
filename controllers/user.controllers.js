@@ -2,9 +2,11 @@ const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
 const responses = require("../utils/responses");
-const jwt = require("jsonwebtoken");
 const Media = require("../models/Media");
 const MyUser = require("../models/MyUser");
+const { getGoogleUser } = require("../services/GoogleSignIn.service");
+const { generateToken } = require("../services/Token.service");
+const { updateUser } = require("../services/User.service");
 
 async function register(req, res) {
   try {
@@ -23,7 +25,7 @@ async function register(req, res) {
       password: hashedPassword,
     });
 
-    return responses.successResponse(res, null, "Register successfully");
+    return responses.successResponse(res, newData, "Register successfully");
   } catch (error) {
     return responses.internalFailureResponse(res, error);
   }
@@ -80,18 +82,12 @@ async function login(req, res) {
         );
       }
 
-      const token = jwt.sign(
-        {
-          _id: user._id,
-          email: user.email,
-          name: user.name,
-          lastLogin: updatedUser.lastLogin,
-        },
-        process.env.MONGO_URL,
-        {
-          expiresIn: "7d",
-        }
-      );
+      const token = generateToken({
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+        lastLogin: updatedUser.lastLogin,
+      });
 
       return responses.successResponse(
         res,
@@ -106,6 +102,61 @@ async function login(req, res) {
         "Login successfully"
       );
     });
+  } catch (error) {
+    return responses.internalFailureResponse(res, error);
+  }
+}
+
+async function handleGoogleSignIn(req, res) {
+  try {
+    const { idToken } = req.body;
+
+    const { name, email } = await getGoogleUser(idToken);
+
+    let user = await User.findOne({ email: email });
+
+    if (user) {
+      const data = {
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+        socialType: user.socialType,
+      };
+
+      return await updateUser(data, res, "Login successfully");
+    }
+
+    const newData = await User.create({
+      name: name,
+      email: email,
+      password: null,
+      socialType: "1",
+    });
+
+    const data = {
+      _id: newData._id,
+      email: newData.email,
+      name: newData.name,
+      socialType: newData.socialType,
+    };
+
+    return await updateUser(data, res, "Login successfully");
+  } catch (error) {
+    return responses.internalFailureResponse(
+      res,
+      error,
+      "Invalid token signature"
+    );
+  }
+}
+
+async function socialLogin(req, res) {
+  try {
+    let { socialType } = req.query;
+
+    if (socialType == "1") {
+      return await handleGoogleSignIn(req, res);
+    }
   } catch (error) {
     return responses.internalFailureResponse(res, error);
   }
@@ -228,6 +279,8 @@ async function updateMyUser(req, res) {
 module.exports = {
   register,
   login,
+  socialLogin,
+  getGoogleUser,
   getMyUsers,
   addMyUser,
   removeMyUser,
