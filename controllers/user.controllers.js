@@ -66,6 +66,11 @@ async function login(req, res) {
         res,
         "User does't exist with provided credentials"
       );
+    } else if (user.socialType != "4") {
+      return responses.authFailureResponse(
+        res,
+        "It appears you may have signed up with a different method"
+      );
     }
 
     const updatedUser = await User.findByIdAndUpdate(
@@ -96,6 +101,7 @@ async function login(req, res) {
             _id: updatedUser._id,
             email: updatedUser.email,
             name: updatedUser.name,
+            socialType: updatedUser.socialType,
           },
           token,
         },
